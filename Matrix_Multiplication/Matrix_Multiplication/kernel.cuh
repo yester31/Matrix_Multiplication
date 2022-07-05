@@ -7,6 +7,8 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <cublas_v2.h>
+
 #define ITERS 10
 
 // ERROR CHECK
@@ -26,4 +28,6 @@
 }while(0)
 #endif
 
-void matmult_cu0(int M, int N, int K, float* mat_a, float* mat_b, float* mat_c);
+void matmult_cu(int M, int N, int K, float* mat_a, float* mat_b, float* mat_c);
+void matmult_cu_shared(int M, int N, int K, float* mat_a, float* mat_b, float* mat_c);
+void matmult_cublas(int M, int N, int K, float* mat_a, float* mat_b, float* mat_c);

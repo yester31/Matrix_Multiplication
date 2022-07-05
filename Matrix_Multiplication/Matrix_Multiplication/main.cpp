@@ -3,7 +3,7 @@
 #include "kernel.cuh"
 
 // 0 - 100 사이 실수로 데이터 초기화
-void init_matrix(float* ptr, unsigned int size) 
+void init_matrix(float* ptr, unsigned int size)
 {
     std::cout << "[INFO] Initialization of Matrix value" << std::endl;
     srand(time(0));
@@ -11,7 +11,7 @@ void init_matrix(float* ptr, unsigned int size)
 }
 
 // 콘솔창에 행렬값을 출력
-void print_matrix(std::vector<float> &output, int M, int N) 
+void print_matrix(std::vector<float> &output, int M, int N)
 {
     std::cout << "[INFO] Print Matrix" << std::endl;
     std::cout << std::endl; std::cout << std::endl;
@@ -23,7 +23,7 @@ void print_matrix(std::vector<float> &output, int M, int N)
 }
 
 // 두 행렬값 비교
-void check_match(std::vector<float> &matA, std::vector<float> &matB) 
+void check_match(std::vector<float> &matA, std::vector<float> &matB)
 {
     std::cout << "[INFO] Check Two Matrix value match" << std::endl;
     if (matA.size() != matB.size()) {
@@ -42,7 +42,7 @@ void check_match(std::vector<float> &matA, std::vector<float> &matB)
     return;
 }
 
-void matmult_cv(int M, int N, int K, float* mat_a, float* mat_b, float* mat_c) 
+void matmult_cv(int M, int N, int K, float* mat_a, float* mat_b, float* mat_c)
 {
     std::cout << "==================================================" << std::endl;
     std::cout << "[INFO] OpenCV Matrix Multiplication" << std::endl;
@@ -61,7 +61,7 @@ void matmult_cv(int M, int N, int K, float* mat_a, float* mat_b, float* mat_c)
     std::cout << "==================================================" << std::endl;
 }
 
-void matmult(int M, int N, int K, const float* mat_a, const float* mat_b, float* mat_c) 
+void matmult(int M, int N, int K, const float* mat_a, const float* mat_b, float* mat_c)
 {
     std::cout << "==================================================" << std::endl;
     std::cout << "[INFO] Naive Matrix Multiplication" << std::endl;
@@ -91,7 +91,7 @@ void transpose(int I, int J, const float* mati, float* mato) {
     }
 }
 
-void matmult_trans(int M, int N, int K, const float* mat_a, const float* mat_b, float* mat_c) 
+void matmult_trans(int M, int N, int K, const float* mat_a, const float* mat_b, float* mat_c)
 {
     std::cout << "==================================================" << std::endl;
     std::cout << "[INFO] Matrix Multiplication with Transpose" << std::endl;
@@ -117,7 +117,7 @@ void matmult_trans(int M, int N, int K, const float* mat_a, const float* mat_b, 
 
 //gcc 사용시 컴파일 명령어에 - fopenmp 를 추가
 //예) gcc - g - Wall - fopenmp - o omp_ex omp_ex.c
-void matmult_omp(int M, int N, int K, const float* mat_a, const float* mat_b, float* mat_c) 
+void matmult_omp(int M, int N, int K, const float* mat_a, const float* mat_b, float* mat_c)
 {
     std::cout << "==================================================" << std::endl;
     std::cout << "[INFO] Matrix Multiplication with OpenMP" << std::endl;
@@ -143,7 +143,7 @@ void matmult_omp(int M, int N, int K, const float* mat_a, const float* mat_b, fl
     std::cout << "==================================================" << std::endl;
 }
 
-void matmult_opm_trans(int M, int N, int K, const float* mat_a, const float* mat_b, float* mat_c) 
+void matmult_opm_trans(int M, int N, int K, const float* mat_a, const float* mat_b, float* mat_c)
 {
     std::cout << "==================================================" << std::endl;
     std::cout << "[INFO] Matrix Multiplication with OpenMP & Transpose" << std::endl;
@@ -175,7 +175,10 @@ void matmult_sse(int M, int N, int K, const float* mat_a, const float* mat_b, fl
 {
     std::cout << "==================================================" << std::endl;
     std::cout << "[INFO] Matrix Multiplication with SSE" << std::endl;
-
+    if (N % 4 != 0) {
+        std::cout << "[ERROR] The value of N must be a multiple of 4" << std::endl;
+        return;
+    }
     uint64_t start_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     for (int i = 0; i < ITERS; i++) {
         for (int m = 0; m < M; m++) {
@@ -199,9 +202,12 @@ void matmult_sse(int M, int N, int K, const float* mat_a, const float* mat_b, fl
 int main()
 {
     // A[M, K] * B[K, N] = C[M, N]
-    const int M = 256;
-    const int K = 512;
+    const int M = 1024;
+    const int K = 1024;
     const int N = 1024;
+
+    std::cout << "A[" << M << ", " << K << "] * B[" << K << ", " << N << "] = C[" << M << ", " << N << "]" << std::endl;
+    std::cout << "Iteration count : " << ITERS << std::endl;
 
     std::vector<float> mat_a(M * K);
     std::vector<float> mat_b(K * N);
@@ -211,15 +217,15 @@ int main()
     std::vector<float> mat_c_omp(M * N);
     std::vector<float> mat_c_omp_trans(M * N);
     std::vector<float> mat_c_sse(M * N);
-    std::vector<float> mat_c_cu0(M * N);
+    std::vector<float> mat_c_cu(M * N);
+    std::vector<float> mat_c_shared(M * N);
+    std::vector<float> mat_c_cublas(M * N);
 
     // initialization matrix value 
     init_matrix(mat_a.data(), mat_a.size());
     init_matrix(mat_b.data(), mat_b.size());
     //print_matrix(mat_a, M, K);
     //print_matrix(mat_b, K, N);
-
-    std::cout << "Iteration count : " << ITERS << std::endl;
 
     // opencv matrix multiplication
     matmult_cv(M, N, K, mat_a.data(), mat_b.data(), mat_c_cv.data());
@@ -240,7 +246,13 @@ int main()
     matmult_sse(M, N, K, mat_a.data(), mat_b.data(), mat_c_sse.data());
 
     // matrix multiplication on GPU
-    matmult_cu0(M, N, K, mat_a.data(), mat_b.data(), mat_c_cu0.data());
+    matmult_cu(M, N, K, mat_a.data(), mat_b.data(), mat_c_cu.data());
+
+    // matrix multiplication on GPU with shared memory
+    matmult_cu_shared(M, N, K, mat_a.data(), mat_b.data(), mat_c_shared.data());
+
+    // cublas matrix multiplication on GPU
+    matmult_cublas(M, N, K, mat_a.data(), mat_b.data(), mat_c_cublas.data());
 
     // match check
     check_match(mat_c_cv, mat_c_naive);
@@ -248,7 +260,9 @@ int main()
     check_match(mat_c_cv, mat_c_omp);
     check_match(mat_c_cv, mat_c_omp_trans);
     check_match(mat_c_cv, mat_c_sse);
-    check_match(mat_c_cv, mat_c_cu0);
+    check_match(mat_c_cv, mat_c_cu);
+    check_match(mat_c_cv, mat_c_shared);
+    check_match(mat_c_cv, mat_c_cublas);
 
     return 0;
 }
