@@ -9,7 +9,7 @@
 #include <string>
 #include <cublas_v2.h>
 
-#define ITERS 10
+#define ITERS 100
 
 // ERROR CHECK
 #if defined(NDEBUG)     //release mode

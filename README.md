@@ -7,15 +7,17 @@
 * opencv Version : 3.4.5
 
 ## Performace Evaluation (Release mode)
-* A[1024, 1024] * B[1024, 1024] = C[1024, 1024]
+* A[512, 512] * B[512, 512] = C[512, 512]
 * 100 iteration
 
 <table border="0"  width="100%">
 	<tbody align="center">
 		<tr>
 			<td>cpu</td>
-			<td><strong>OpenCV</strong></td>
-            <td><strong>Naive</strong></td>
+			<td>OpenCV</td>
+            <td>Naive</td>
+            <td>2x2</td>
+            <td>Strassen</td>
             <td>after Transpose</td>
             <td>OpenMP</td>
             <td>OpenMP & Transpose</td>
@@ -23,36 +25,40 @@
 		</tr>
 		<tr>
 			<td>Avg Duration time [ms]</td>
-			<td><strong>434 ms</strong></td>
-			<td><strong>2020 ms</strong></td>
-			<td>930 ms</td>
-			<td>419 ms</td>
-			<td>139 ms</td>
-			<td>452 ms</td>
+			<td>50 ms</td>
+			<td>149 ms</td>
+			<td>105 ms</td>
+			<td>63 ms</td>
+			<td>112 ms</td>
+			<td>36 ms</td>
+			<td>18 ms</td>
+			<td>29 ms</td>
 		</tr>
 	</tbody>
 </table>
 
 <table border="0"  width="100%">
-	<tbody align="center">
-		<tr>
-			<td>gpu</td>
+    <tbody align="center">
+        <tr>
+            <td>gpu</td>
             <td>CUDA</td>
             <td>CUDA with Shared Memory</td>
-            <td><strong>Cublas</strong></td>
-		</tr>
-		<tr>
-			<td>Avg Duration time [ms]</td>
-			<td>13 ms</td>
-			<td>16 ms</td>
-			<td><strong>4 ms</strong></td>
-		</tr>
-	</tbody>
+            <td>Cublas</td>
+        </tr>
+        <tr>
+            <td>Avg Duration time [ms]</td>
+            <td>2 ms</td>
+            <td>1 ms</td>
+            <td>1 ms</td>
+        </tr>
+    </tbody>
 </table>
 
 
 ## Description
 - 여러 가지 방법을 사용하여 행렬 곱을 구현함.
+- 2x2 : unlooping 부분 적용하여 4개씩 계산 수행
+- Strassen : divid & conquer 방식의 행렬곱 알고리즘
 - after Transpose : Naive 행렬곱 계산 과정을 보면 두 행렬에서 값을 가져올 때(메모리에 접근할 때) 하나의 행렬에서 연속적으로 접근하지 못하는 것을 볼 수 있다.
 그렇기 때문에 매번 메모리 접근하기 위해 비용이 사용된다. 이를 개선하기 위해 사전에 전치 행렬(Transpose)로 변환하여 메모리 접근을 연속하게 만들어
 메모리 접근에 사용되는 비용을 최소화하게 만듦.
